@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package = "./";
+
+import "google/protobuf/empty.proto";
+
+service DeliveryAgentService {
+  rpc AddDeliveryAgent(AddDeliveryAgentRequest) returns (AddDeliveryAgentResponse);
+  rpc AssignAgentToOrder(google.protobuf.Empty) returns (AssignAgentToOrderResponse);
+}
+
+message AddDeliveryAgentRequest {
+  string name = 1;
+  string city = 2;
+}
+
+message AddDeliveryAgentResponse {
+  string message = 1;
+}
+
+message AssignAgentToOrderResponse {
+  string message = 1;
+}
