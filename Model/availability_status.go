@@ -1,4 +1,4 @@
-package DeliveryAgent
+package Model
 
 type AvailabilityStatus string
 

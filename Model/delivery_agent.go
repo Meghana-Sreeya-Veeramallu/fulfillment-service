@@ -1,4 +1,4 @@
-package DeliveryAgent
+package Model
 
 import (
 	"errors"

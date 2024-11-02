@@ -20,11 +20,11 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	DeliveryAgentService_AddDeliveryAgent_FullMethodName   = "/proto.DeliveryAgentService/AddDeliveryAgent"
-	DeliveryAgentService_AssignAgentToOrder_FullMethodName = "/proto.DeliveryAgentService/AssignAgentToOrder"
+	DeliveryAgentService_AddDeliveryAgent_FullMethodName   = "/proto.Service/AddDeliveryAgent"
+	DeliveryAgentService_AssignAgentToOrder_FullMethodName = "/proto.Service/AssignAgentToOrder"
 )
 
-// DeliveryAgentServiceClient is the client API for DeliveryAgentService service.
+// DeliveryAgentServiceClient is the client API for Service service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type DeliveryAgentServiceClient interface {
@@ -60,7 +60,7 @@ func (c *deliveryAgentServiceClient) AssignAgentToOrder(ctx context.Context, in 
 	return out, nil
 }
 
-// DeliveryAgentServiceServer is the server API for DeliveryAgentService service.
+// DeliveryAgentServiceServer is the server API for Service service.
 // All implementations must embed UnimplementedDeliveryAgentServiceServer
 // for forward compatibility.
 type DeliveryAgentServiceServer interface {
@@ -139,11 +139,11 @@ func _DeliveryAgentService_AssignAgentToOrder_Handler(srv interface{}, ctx conte
 	return interceptor(ctx, in, info, handler)
 }
 
-// DeliveryAgentService_ServiceDesc is the grpc.ServiceDesc for DeliveryAgentService service.
+// DeliveryAgentService_ServiceDesc is the grpc.ServiceDesc for Service service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var DeliveryAgentService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "proto.DeliveryAgentService",
+	ServiceName: "proto.Service",
 	HandlerType: (*DeliveryAgentServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

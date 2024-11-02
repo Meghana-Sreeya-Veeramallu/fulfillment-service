@@ -1,7 +1,7 @@
-package DeliveryAgentService
+package Service
 
 import (
-	"Fulfillment/DeliveryAgent"
+	"Fulfillment/Model"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -14,7 +14,7 @@ func setupTestDB() *gorm.DB {
 		Logger: logger.Default.LogMode(logger.Silent),
 	})
 
-	err := db.AutoMigrate(&DeliveryAgent.DeliveryAgent{})
+	err := db.AutoMigrate(&Model.DeliveryAgent{})
 	if err != nil {
 		return nil
 	}
@@ -32,7 +32,7 @@ func TestCreateDeliveryAgentSuccessfully(t *testing.T) {
 	assert.NotNil(t, agent)
 	assert.Equal(t, name, agent.Name)
 	assert.Equal(t, city, agent.City)
-	assert.Equal(t, DeliveryAgent.AVAILABLE, agent.AvailabilityStatus)
+	assert.Equal(t, Model.AVAILABLE, agent.AvailabilityStatus)
 	assert.Nil(t, agent.OrderID)
 }
 
@@ -70,11 +70,11 @@ func TestAssignAgentToOrderSuccessfully(t *testing.T) {
 
 	assert.NoError(t, err)
 
-	var updatedAgent DeliveryAgent.DeliveryAgent
+	var updatedAgent Model.DeliveryAgent
 	db.First(&updatedAgent, agent.Id)
 
 	assert.Equal(t, orderID, *updatedAgent.OrderID)
-	assert.Equal(t, DeliveryAgent.UNAVAILABLE, updatedAgent.AvailabilityStatus)
+	assert.Equal(t, Model.UNAVAILABLE, updatedAgent.AvailabilityStatus)
 }
 
 func TestAssignAgentToOrderWhenDeliveryAgentNotFound(t *testing.T) {

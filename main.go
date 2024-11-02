@@ -1,8 +1,8 @@
 package main
 
 import (
-	"Fulfillment/DeliveryAgent"
-	"Fulfillment/DeliveryAgentController"
+	"Fulfillment/Controller"
+	"Fulfillment/Model"
 	"github.com/gorilla/mux"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -17,12 +17,12 @@ func main() {
 		log.Fatal("Failed to connect to the database:", err)
 	}
 
-	if err := db.AutoMigrate(&DeliveryAgent.DeliveryAgent{}); err != nil {
+	if err := db.AutoMigrate(&Model.DeliveryAgent{}); err != nil {
 		log.Fatal("Failed to migrate database schema:", err)
 	}
 
 	router := mux.NewRouter()
-	deliveryAgentServer := DeliveryAgentController.NewDeliveryAgentServer(db)
+	deliveryAgentServer := Controller.NewDeliveryAgentServer(db)
 	deliveryAgentServer.RegisterRoutes(router)
 
 	log.Println("Starting HTTP server on port 8082...")

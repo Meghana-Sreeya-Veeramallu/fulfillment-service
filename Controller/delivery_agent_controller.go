@@ -1,7 +1,7 @@
-package DeliveryAgentController
+package Controller
 
 import (
-	"Fulfillment/DeliveryAgentService"
+	"Fulfillment/Service"
 	pb "Fulfillment/proto"
 	"encoding/json"
 	"github.com/gorilla/mux"
@@ -26,7 +26,7 @@ func (s *DeliveryAgentServer) AddDeliveryAgent(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	_, err := DeliveryAgentService.AddDeliveryAgent(s.DB, req.Name, req.City)
+	_, err := Service.AddDeliveryAgent(s.DB, req.Name, req.City)
 	if err != nil {
 		if err.Error() == "name cannot be empty" || err.Error() == "city cannot be empty" {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -56,7 +56,7 @@ func (s *DeliveryAgentServer) AssignAgentToOrder(w http.ResponseWriter, r *http.
 		return
 	}
 
-	err = DeliveryAgentService.AssignAgentToOrder(s.DB, uint(agentID), orderID)
+	err = Service.AssignAgentToOrder(s.DB, uint(agentID), orderID)
 	if err != nil {
 		if err.Error() == "delivery agent not found" || err.Error() == "delivery agent is not available" {
 			http.Error(w, err.Error(), http.StatusBadRequest)

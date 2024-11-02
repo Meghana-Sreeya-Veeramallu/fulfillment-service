@@ -1,7 +1,7 @@
-package DeliveryAgentController
+package Controller
 
 import (
-	"Fulfillment/DeliveryAgent"
+	"Fulfillment/Model"
 	pb "Fulfillment/proto"
 	"bytes"
 	"encoding/json"
@@ -25,7 +25,7 @@ func setupTestDB() *gorm.DB {
 	db, _ := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Silent),
 	})
-	err := db.AutoMigrate(&DeliveryAgent.DeliveryAgent{})
+	err := db.AutoMigrate(&Model.DeliveryAgent{})
 	if err != nil {
 		return nil
 	}
@@ -136,7 +136,7 @@ func TestAssignAgentToOrderSuccessfully(t *testing.T) {
 	json.Unmarshal(rr.Body.Bytes(), &addResp)
 	assert.Equal(t, "Delivery agent added successfully", addResp.Message)
 
-	var addedAgent DeliveryAgent.DeliveryAgent
+	var addedAgent Model.DeliveryAgent
 	if err := db.First(&addedAgent, uint32(1)).Error; err != nil {
 		t.Fatalf("Failed to find added agent: %v", err)
 	}
@@ -154,12 +154,12 @@ func TestAssignAgentToOrderSuccessfully(t *testing.T) {
 	json.Unmarshal(assignRR.Body.Bytes(), &assignResp)
 	assert.Equal(t, "Delivery agent assigned to order successfully", assignResp.Message)
 
-	var updatedAgent DeliveryAgent.DeliveryAgent
+	var updatedAgent Model.DeliveryAgent
 	db.First(&updatedAgent, uint32(1))
 
 	orderID := 123
 	assert.Equal(t, orderID, *updatedAgent.OrderID)
-	assert.Equal(t, DeliveryAgent.UNAVAILABLE, updatedAgent.AvailabilityStatus)
+	assert.Equal(t, Model.UNAVAILABLE, updatedAgent.AvailabilityStatus)
 }
 
 func TestAssignAgentToOrderWhenDeliveryAgentNotFound(t *testing.T) {
@@ -192,7 +192,7 @@ func TestAssignAgentToOrderWhenAlreadyAssigned(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 
-	var addedAgent DeliveryAgent.DeliveryAgent
+	var addedAgent Model.DeliveryAgent
 	if err := db.First(&addedAgent, uint32(1)).Error; err != nil {
 		t.Fatalf("Failed to find added agent: %v", err)
 	}
@@ -206,12 +206,12 @@ func TestAssignAgentToOrderWhenAlreadyAssigned(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, assignRR.Code)
 
-	var updatedAgent DeliveryAgent.DeliveryAgent
+	var updatedAgent Model.DeliveryAgent
 	db.First(&updatedAgent, uint32(1))
 
 	orderID := 123
 	assert.Equal(t, orderID, *updatedAgent.OrderID)
-	assert.Equal(t, DeliveryAgent.UNAVAILABLE, updatedAgent.AvailabilityStatus)
+	assert.Equal(t, Model.UNAVAILABLE, updatedAgent.AvailabilityStatus)
 
 	assignReq2, _ := http.NewRequest("POST", "/delivery-agents/1/orders/456", nil)
 	assignReq2.Header.Set("Content-Type", "application/json")

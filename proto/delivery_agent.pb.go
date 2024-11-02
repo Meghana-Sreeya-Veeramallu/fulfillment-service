@@ -217,10 +217,10 @@ var file_delivery_agent_proto_goTypes = []any{
 	(*emptypb.Empty)(nil),              // 3: google.protobuf.Empty
 }
 var file_delivery_agent_proto_depIdxs = []int32{
-	0, // 0: proto.DeliveryAgentService.AddDeliveryAgent:input_type -> proto.AddDeliveryAgentRequest
-	3, // 1: proto.DeliveryAgentService.AssignAgentToOrder:input_type -> google.protobuf.Empty
-	1, // 2: proto.DeliveryAgentService.AddDeliveryAgent:output_type -> proto.AddDeliveryAgentResponse
-	2, // 3: proto.DeliveryAgentService.AssignAgentToOrder:output_type -> proto.AssignAgentToOrderResponse
+	0, // 0: proto.Service.AddDeliveryAgent:input_type -> proto.AddDeliveryAgentRequest
+	3, // 1: proto.Service.AssignAgentToOrder:input_type -> google.protobuf.Empty
+	1, // 2: proto.Service.AddDeliveryAgent:output_type -> proto.AddDeliveryAgentResponse
+	2, // 3: proto.Service.AssignAgentToOrder:output_type -> proto.AssignAgentToOrderResponse
 	2, // [2:4] is the sub-list for method output_type
 	0, // [0:2] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
