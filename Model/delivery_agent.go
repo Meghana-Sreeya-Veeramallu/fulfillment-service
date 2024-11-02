@@ -5,6 +5,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// DeliveryAgent represents a delivery agent.
 type DeliveryAgent struct {
 	Id                 uint               `gorm:"primaryKey;autoIncrement"`
 	Name               string             `gorm:"size:100"`
@@ -13,6 +14,7 @@ type DeliveryAgent struct {
 	OrderID            *int
 }
 
+// NewDeliveryAgent creates a new delivery agent.
 func NewDeliveryAgent(db *gorm.DB, name string, city string) (*DeliveryAgent, error) {
 	if name == "" {
 		return nil, errors.New("name cannot be empty")

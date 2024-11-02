@@ -2,18 +2,47 @@ package Service
 
 import (
 	"Fulfillment/Model"
+	"Fulfillment/Repository"
 	"errors"
-	"gorm.io/gorm"
 )
 
-func AddDeliveryAgent(db *gorm.DB, name string, city string) (*Model.DeliveryAgent, error) {
-	return Model.NewDeliveryAgent(db, name, city)
+// DeliveryAgentService handles business logic related to delivery agents.
+type DeliveryAgentService struct {
+	repo *Repository.DeliveryAgentRepository
 }
 
-func AssignAgentToOrder(db *gorm.DB, deliveryAgentID uint, orderID int) error {
-	var agent Model.DeliveryAgent
+// NewDeliveryAgentService creates a new DeliveryAgentService.
+func NewDeliveryAgentService(repo *Repository.DeliveryAgentRepository) *DeliveryAgentService {
+	return &DeliveryAgentService{repo: repo}
+}
 
-	if err := db.First(&agent, deliveryAgentID).Error; err != nil {
+// AddDeliveryAgent adds a new delivery agent to the repository.
+func (s *DeliveryAgentService) AddDeliveryAgent(name string, city string) (*Model.DeliveryAgent, error) {
+	if name == "" {
+		return nil, errors.New("name cannot be empty")
+	}
+	if city == "" {
+		return nil, errors.New("city cannot be empty")
+	}
+
+	agent := &Model.DeliveryAgent{
+		Name:               name,
+		City:               city,
+		AvailabilityStatus: Model.AVAILABLE,
+		OrderID:            nil,
+	}
+
+	if err := s.repo.Create(agent); err != nil {
+		return nil, err
+	}
+
+	return agent, nil
+}
+
+// AssignAgentToOrder assigns a delivery agent to an order.
+func (s *DeliveryAgentService) AssignAgentToOrder(deliveryAgentID uint, orderID int) error {
+	agent, err := s.repo.FindByID(deliveryAgentID)
+	if err != nil {
 		return errors.New("delivery agent not found")
 	}
 
@@ -24,9 +53,5 @@ func AssignAgentToOrder(db *gorm.DB, deliveryAgentID uint, orderID int) error {
 	agent.OrderID = &orderID
 	agent.AvailabilityStatus = Model.UNAVAILABLE
 
-	if err := db.Save(&agent).Error; err != nil {
-		return err
-	}
-
-	return nil
+	return s.repo.Save(agent)
 }

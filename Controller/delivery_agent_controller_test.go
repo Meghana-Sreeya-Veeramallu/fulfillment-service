@@ -2,6 +2,8 @@ package Controller
 
 import (
 	"Fulfillment/Model"
+	"Fulfillment/Repository"
+	"Fulfillment/Service"
 	pb "Fulfillment/proto"
 	"context"
 	"google.golang.org/grpc"
@@ -26,17 +28,25 @@ const bufSize = 1024 * 1024 // 1MB
 
 // Setup function to initialize the test database and server
 func setup() {
-	db, _ = gorm.Open(sqlite.Open(":memory:"), &gorm.Config{
+	var err error
+	db, err = gorm.Open(sqlite.Open(":memory:"), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Silent),
 	})
-	err := db.AutoMigrate(&Model.DeliveryAgent{})
 	if err != nil {
 		panic(err)
 	}
 
+	err = db.AutoMigrate(&Model.DeliveryAgent{})
+	if err != nil {
+		panic(err)
+	}
+
+	repo := Repository.NewDeliveryAgentRepository(db)
+	service := Service.NewDeliveryAgentService(repo)
+
 	lis = bufconn.Listen(bufSize)
 	server = grpc.NewServer()
-	pb.RegisterDeliveryAgentServiceServer(server, NewDeliveryAgentServer(db))
+	pb.RegisterDeliveryAgentServiceServer(server, NewDeliveryAgentServer(service))
 
 	go func() {
 		if err := server.Serve(lis); err != nil {

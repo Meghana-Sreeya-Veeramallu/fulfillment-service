@@ -6,23 +6,22 @@ import (
 	"context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
-	"gorm.io/gorm"
 )
 
 // DeliveryAgentServer represents the gRPC server for delivery agents.
 type DeliveryAgentServer struct {
 	pb.UnimplementedDeliveryAgentServiceServer
-	DB *gorm.DB
+	Service *Service.DeliveryAgentService
 }
 
 // NewDeliveryAgentServer creates a new DeliveryAgentServer.
-func NewDeliveryAgentServer(db *gorm.DB) *DeliveryAgentServer {
-	return &DeliveryAgentServer{DB: db}
+func NewDeliveryAgentServer(service *Service.DeliveryAgentService) *DeliveryAgentServer {
+	return &DeliveryAgentServer{Service: service}
 }
 
 // AddDeliveryAgent handles the gRPC request for adding a delivery agent.
 func (s *DeliveryAgentServer) AddDeliveryAgent(ctx context.Context, req *pb.AddDeliveryAgentRequest) (*pb.AddDeliveryAgentResponse, error) {
-	_, err := Service.AddDeliveryAgent(s.DB, req.Name, req.City)
+	_, err := s.Service.AddDeliveryAgent(req.Name, req.City)
 	if err != nil {
 		if err.Error() == "name cannot be empty" || err.Error() == "city cannot be empty" {
 			return nil, grpc.Errorf(codes.InvalidArgument, err.Error())
@@ -40,7 +39,7 @@ func (s *DeliveryAgentServer) AssignAgentToOrder(ctx context.Context, req *pb.As
 	agentID := req.AgentId
 	orderID := req.OrderId
 
-	err := Service.AssignAgentToOrder(s.DB, uint(agentID), int(orderID))
+	err := s.Service.AssignAgentToOrder(uint(agentID), int(orderID))
 	if err != nil {
 		if err.Error() == "delivery agent not found" || err.Error() == "delivery agent is not available" {
 			return nil, grpc.Errorf(codes.InvalidArgument, err.Error())

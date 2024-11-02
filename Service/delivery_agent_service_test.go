@@ -2,6 +2,7 @@ package Service
 
 import (
 	"Fulfillment/Model"
+	"Fulfillment/Repository"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -9,6 +10,7 @@ import (
 	"testing"
 )
 
+// setupTestDB function to initialize a new in-memory database for testing.
 func setupTestDB() *gorm.DB {
 	db, _ := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Silent),
@@ -21,12 +23,20 @@ func setupTestDB() *gorm.DB {
 	return db
 }
 
-func TestCreateDeliveryAgentSuccessfully(t *testing.T) {
+// setupService function to initialize a new DeliveryAgentService with the provided database.
+func setupService(db *gorm.DB) *DeliveryAgentService {
+	repo := Repository.NewDeliveryAgentRepository(db)
+	return NewDeliveryAgentService(repo)
+}
+
+// Test AddDeliveryAgent
+func TestAddDeliveryAgentSuccessfully(t *testing.T) {
 	db := setupTestDB()
+	service := setupService(db)
 	name := "Ketan"
 	city := "Hyderabad"
 
-	agent, err := AddDeliveryAgent(db, name, city)
+	agent, err := service.AddDeliveryAgent(name, city)
 
 	assert.NoError(t, err)
 	assert.NotNil(t, agent)
@@ -36,37 +46,43 @@ func TestCreateDeliveryAgentSuccessfully(t *testing.T) {
 	assert.Nil(t, agent.OrderID)
 }
 
-func TestCreateDeliveryAgentWithEmptyName(t *testing.T) {
+// Test AddDeliveryAgent with empty name
+func TestAddDeliveryAgentWithEmptyName(t *testing.T) {
 	db := setupTestDB()
+	service := setupService(db)
 	city := "Hyderabad"
 
-	agent, err := AddDeliveryAgent(db, "", city)
+	agent, err := service.AddDeliveryAgent("", city)
 
 	assert.Error(t, err)
 	assert.Nil(t, agent)
 	assert.Equal(t, "name cannot be empty", err.Error())
 }
 
-func TestCreateDeliveryAgentWithEmptyCity(t *testing.T) {
+// Test AddDeliveryAgent with empty city
+func TestAddDeliveryAgentWithEmptyCity(t *testing.T) {
 	db := setupTestDB()
+	service := setupService(db)
 	name := "Ketan"
 
-	agent, err := AddDeliveryAgent(db, name, "")
+	agent, err := service.AddDeliveryAgent(name, "")
 
 	assert.Error(t, err)
 	assert.Nil(t, agent)
 	assert.Equal(t, "city cannot be empty", err.Error())
 }
 
+// Test AddDeliveryAgent with empty name and city
 func TestAssignAgentToOrderSuccessfully(t *testing.T) {
 	db := setupTestDB()
+	service := setupService(db)
 	name := "Ketan"
 	city := "Hyderabad"
 
-	agent, _ := AddDeliveryAgent(db, name, city)
+	agent, _ := service.AddDeliveryAgent(name, city)
 
 	orderID := 123
-	err := AssignAgentToOrder(db, agent.Id, orderID)
+	err := service.AssignAgentToOrder(agent.Id, orderID)
 
 	assert.NoError(t, err)
 
@@ -77,28 +93,32 @@ func TestAssignAgentToOrderSuccessfully(t *testing.T) {
 	assert.Equal(t, Model.UNAVAILABLE, updatedAgent.AvailabilityStatus)
 }
 
+// Test AssignAgentToOrder when agent not found
 func TestAssignAgentToOrderWhenDeliveryAgentNotFound(t *testing.T) {
 	db := setupTestDB()
+	service := setupService(db)
 
-	err := AssignAgentToOrder(db, 999, 123)
+	err := service.AssignAgentToOrder(999, 123)
 
 	assert.Error(t, err)
 	assert.Equal(t, "delivery agent not found", err.Error())
 }
 
+// Test AssignAgentToOrder when agent is not available
 func TestAssignAgentToOrderWhenAlreadyAssigned(t *testing.T) {
 	db := setupTestDB()
+	service := setupService(db)
 	name := "Ketan"
 	city := "Hyderabad"
 
-	agent, _ := AddDeliveryAgent(db, name, city)
+	agent, _ := service.AddDeliveryAgent(name, city)
 
 	orderID1 := 123
-	err := AssignAgentToOrder(db, agent.Id, orderID1)
+	err := service.AssignAgentToOrder(agent.Id, orderID1)
 	assert.NoError(t, err)
 
 	orderID2 := 456
-	err = AssignAgentToOrder(db, agent.Id, orderID2)
+	err = service.AssignAgentToOrder(agent.Id, orderID2)
 
 	assert.Error(t, err)
 	assert.Equal(t, "delivery agent is not available", err.Error())

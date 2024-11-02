@@ -9,6 +9,7 @@ import (
 
 var db *gorm.DB
 
+// TestMain function to initialize a new database connection and migrate the schema.
 func TestMain(m *testing.M) {
 	var err error
 	dsn := "host=localhost user=postgres password=admin dbname=fulfillment_service port=5432 sslmode=disable"
@@ -34,6 +35,7 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
+// Test NewDeliveryAgent
 func TestNewDeliveryAgent(t *testing.T) {
 	name := "Ketan"
 	city := "Hyderabad"
@@ -64,6 +66,7 @@ func TestNewDeliveryAgent(t *testing.T) {
 	}
 }
 
+// Test NewDeliveryAgent with empty name
 func TestNewDeliveryAgentWithEmptyName(t *testing.T) {
 	agent, err := NewDeliveryAgent(db, "", "Hyderabad")
 	if err == nil {
@@ -74,6 +77,7 @@ func TestNewDeliveryAgentWithEmptyName(t *testing.T) {
 	}
 }
 
+// Test NewDeliveryAgent with empty city
 func TestNewDeliveryAgentWithEmptyCity(t *testing.T) {
 	agent, err := NewDeliveryAgent(db, "Ketan", "")
 	if err == nil {
@@ -84,6 +88,7 @@ func TestNewDeliveryAgentWithEmptyCity(t *testing.T) {
 	}
 }
 
+// Test NewDeliveryAgent with empty name and city
 func TestNewDeliveryAgentWithEmptyNameAndCity(t *testing.T) {
 	agent, err := NewDeliveryAgent(db, "", "")
 	if err == nil {

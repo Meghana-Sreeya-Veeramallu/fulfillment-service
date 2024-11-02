@@ -3,6 +3,8 @@ package main
 import (
 	"Fulfillment/Controller"
 	"Fulfillment/Model"
+	"Fulfillment/Repository"
+	"Fulfillment/Service"
 	pb "Fulfillment/proto"
 	"google.golang.org/grpc"
 	"gorm.io/driver/postgres"
@@ -22,13 +24,18 @@ func main() {
 		log.Fatal("Failed to migrate database schema:", err)
 	}
 
+	// Create the repository and service
+	repo := Repository.NewDeliveryAgentRepository(db)
+	deliveryAgentService := Service.NewDeliveryAgentService(repo)
+
 	lis, err := net.Listen("tcp", ":8082")
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	s := grpc.NewServer()
 
-	deliveryAgentServer := Controller.NewDeliveryAgentServer(db)
+	// Create the controller and pass the service
+	deliveryAgentServer := Controller.NewDeliveryAgentServer(deliveryAgentService)
 	pb.RegisterDeliveryAgentServiceServer(s, deliveryAgentServer)
 
 	log.Printf("Server listening at %v", lis.Addr())
