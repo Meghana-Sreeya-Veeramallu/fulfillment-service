@@ -3,76 +3,52 @@ package Controller
 import (
 	"Fulfillment/Service"
 	pb "Fulfillment/proto"
-	"encoding/json"
-	"github.com/gorilla/mux"
+	"context"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"gorm.io/gorm"
-	"net/http"
-	"strconv"
 )
 
+// DeliveryAgentServer represents the gRPC server for delivery agents.
 type DeliveryAgentServer struct {
 	pb.UnimplementedDeliveryAgentServiceServer
 	DB *gorm.DB
 }
 
+// NewDeliveryAgentServer creates a new DeliveryAgentServer.
 func NewDeliveryAgentServer(db *gorm.DB) *DeliveryAgentServer {
 	return &DeliveryAgentServer{DB: db}
 }
 
-func (s *DeliveryAgentServer) AddDeliveryAgent(w http.ResponseWriter, r *http.Request) {
-	var req pb.AddDeliveryAgentRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
+// AddDeliveryAgent handles the gRPC request for adding a delivery agent.
+func (s *DeliveryAgentServer) AddDeliveryAgent(ctx context.Context, req *pb.AddDeliveryAgentRequest) (*pb.AddDeliveryAgentResponse, error) {
 	_, err := Service.AddDeliveryAgent(s.DB, req.Name, req.City)
 	if err != nil {
 		if err.Error() == "name cannot be empty" || err.Error() == "city cannot be empty" {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
+			return nil, grpc.Errorf(codes.InvalidArgument, err.Error())
 		}
-		http.Error(w, "Failed to add delivery agent: "+err.Error(), http.StatusInternalServerError)
-		return
+		return nil, grpc.Errorf(codes.Internal, "Failed to add delivery agent: "+err.Error())
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(&pb.AddDeliveryAgentResponse{
+	return &pb.AddDeliveryAgentResponse{
 		Message: "Delivery agent added successfully",
-	})
+	}, nil
 }
 
-func (s *DeliveryAgentServer) AssignAgentToOrder(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	agentID, err := strconv.Atoi(vars["agent-id"])
-	if err != nil {
-		http.Error(w, "Invalid agent ID", http.StatusBadRequest)
-		return
-	}
+// AssignAgentToOrder handles the gRPC request for assigning an agent to an order.
+func (s *DeliveryAgentServer) AssignAgentToOrder(ctx context.Context, req *pb.AssignAgentToOrderRequest) (*pb.AssignAgentToOrderResponse, error) {
+	agentID := req.AgentId
+	orderID := req.OrderId
 
-	orderID, err := strconv.Atoi(vars["order-id"])
-	if err != nil {
-		http.Error(w, "Invalid order ID", http.StatusBadRequest)
-		return
-	}
-
-	err = Service.AssignAgentToOrder(s.DB, uint(agentID), orderID)
+	err := Service.AssignAgentToOrder(s.DB, uint(agentID), int(orderID))
 	if err != nil {
 		if err.Error() == "delivery agent not found" || err.Error() == "delivery agent is not available" {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
+			return nil, grpc.Errorf(codes.InvalidArgument, err.Error())
 		}
-		http.Error(w, "An error occurred: "+err.Error(), http.StatusInternalServerError)
-		return
+		return nil, grpc.Errorf(codes.Internal, "An error occurred: "+err.Error())
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(&pb.AssignAgentToOrderResponse{
+	return &pb.AssignAgentToOrderResponse{
 		Message: "Delivery agent assigned to order successfully",
-	})
-}
-
-func (s *DeliveryAgentServer) RegisterRoutes(router *mux.Router) {
-	router.HandleFunc("/delivery-agents", s.AddDeliveryAgent).Methods("POST")
-	router.HandleFunc("/delivery-agents/{agent-id}/orders/{order-id}", s.AssignAgentToOrder).Methods("POST")
+	}, nil
 }

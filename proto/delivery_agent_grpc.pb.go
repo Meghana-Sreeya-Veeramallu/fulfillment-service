@@ -11,7 +11,6 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
-	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -20,16 +19,16 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	DeliveryAgentService_AddDeliveryAgent_FullMethodName   = "/proto.Service/AddDeliveryAgent"
-	DeliveryAgentService_AssignAgentToOrder_FullMethodName = "/proto.Service/AssignAgentToOrder"
+	DeliveryAgentService_AddDeliveryAgent_FullMethodName   = "/proto.DeliveryAgentService/AddDeliveryAgent"
+	DeliveryAgentService_AssignAgentToOrder_FullMethodName = "/proto.DeliveryAgentService/AssignAgentToOrder"
 )
 
-// DeliveryAgentServiceClient is the client API for Service service.
+// DeliveryAgentServiceClient is the client API for DeliveryAgentService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type DeliveryAgentServiceClient interface {
 	AddDeliveryAgent(ctx context.Context, in *AddDeliveryAgentRequest, opts ...grpc.CallOption) (*AddDeliveryAgentResponse, error)
-	AssignAgentToOrder(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*AssignAgentToOrderResponse, error)
+	AssignAgentToOrder(ctx context.Context, in *AssignAgentToOrderRequest, opts ...grpc.CallOption) (*AssignAgentToOrderResponse, error)
 }
 
 type deliveryAgentServiceClient struct {
@@ -50,7 +49,7 @@ func (c *deliveryAgentServiceClient) AddDeliveryAgent(ctx context.Context, in *A
 	return out, nil
 }
 
-func (c *deliveryAgentServiceClient) AssignAgentToOrder(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*AssignAgentToOrderResponse, error) {
+func (c *deliveryAgentServiceClient) AssignAgentToOrder(ctx context.Context, in *AssignAgentToOrderRequest, opts ...grpc.CallOption) (*AssignAgentToOrderResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(AssignAgentToOrderResponse)
 	err := c.cc.Invoke(ctx, DeliveryAgentService_AssignAgentToOrder_FullMethodName, in, out, cOpts...)
@@ -60,12 +59,12 @@ func (c *deliveryAgentServiceClient) AssignAgentToOrder(ctx context.Context, in 
 	return out, nil
 }
 
-// DeliveryAgentServiceServer is the server API for Service service.
+// DeliveryAgentServiceServer is the server API for DeliveryAgentService service.
 // All implementations must embed UnimplementedDeliveryAgentServiceServer
 // for forward compatibility.
 type DeliveryAgentServiceServer interface {
 	AddDeliveryAgent(context.Context, *AddDeliveryAgentRequest) (*AddDeliveryAgentResponse, error)
-	AssignAgentToOrder(context.Context, *emptypb.Empty) (*AssignAgentToOrderResponse, error)
+	AssignAgentToOrder(context.Context, *AssignAgentToOrderRequest) (*AssignAgentToOrderResponse, error)
 	mustEmbedUnimplementedDeliveryAgentServiceServer()
 }
 
@@ -79,7 +78,7 @@ type UnimplementedDeliveryAgentServiceServer struct{}
 func (UnimplementedDeliveryAgentServiceServer) AddDeliveryAgent(context.Context, *AddDeliveryAgentRequest) (*AddDeliveryAgentResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddDeliveryAgent not implemented")
 }
-func (UnimplementedDeliveryAgentServiceServer) AssignAgentToOrder(context.Context, *emptypb.Empty) (*AssignAgentToOrderResponse, error) {
+func (UnimplementedDeliveryAgentServiceServer) AssignAgentToOrder(context.Context, *AssignAgentToOrderRequest) (*AssignAgentToOrderResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AssignAgentToOrder not implemented")
 }
 func (UnimplementedDeliveryAgentServiceServer) mustEmbedUnimplementedDeliveryAgentServiceServer() {}
@@ -122,7 +121,7 @@ func _DeliveryAgentService_AddDeliveryAgent_Handler(srv interface{}, ctx context
 }
 
 func _DeliveryAgentService_AssignAgentToOrder_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
+	in := new(AssignAgentToOrderRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -134,16 +133,16 @@ func _DeliveryAgentService_AssignAgentToOrder_Handler(srv interface{}, ctx conte
 		FullMethod: DeliveryAgentService_AssignAgentToOrder_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DeliveryAgentServiceServer).AssignAgentToOrder(ctx, req.(*emptypb.Empty))
+		return srv.(DeliveryAgentServiceServer).AssignAgentToOrder(ctx, req.(*AssignAgentToOrderRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// DeliveryAgentService_ServiceDesc is the grpc.ServiceDesc for Service service.
+// DeliveryAgentService_ServiceDesc is the grpc.ServiceDesc for DeliveryAgentService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var DeliveryAgentService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "proto.Service",
+	ServiceName: "proto.DeliveryAgentService",
 	HandlerType: (*DeliveryAgentServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

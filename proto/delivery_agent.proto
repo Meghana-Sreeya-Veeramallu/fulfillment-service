@@ -4,11 +4,9 @@ package proto;
 
 option go_package = "./";
 
-import "google/protobuf/empty.proto";
-
 service DeliveryAgentService {
   rpc AddDeliveryAgent(AddDeliveryAgentRequest) returns (AddDeliveryAgentResponse);
-  rpc AssignAgentToOrder(google.protobuf.Empty) returns (AssignAgentToOrderResponse);
+  rpc AssignAgentToOrder(AssignAgentToOrderRequest) returns (AssignAgentToOrderResponse);
 }
 
 message AddDeliveryAgentRequest {
@@ -18,6 +16,11 @@ message AddDeliveryAgentRequest {
 
 message AddDeliveryAgentResponse {
   string message = 1;
+}
+
+message AssignAgentToOrderRequest {
+  uint32 agent_id = 1;
+  uint32 order_id = 2;
 }
 
 message AssignAgentToOrderResponse {

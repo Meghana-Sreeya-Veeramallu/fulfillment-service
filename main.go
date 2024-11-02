@@ -3,11 +3,12 @@ package main
 import (
 	"Fulfillment/Controller"
 	"Fulfillment/Model"
-	"github.com/gorilla/mux"
+	pb "Fulfillment/proto"
+	"google.golang.org/grpc"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"log"
-	"net/http"
+	"net"
 )
 
 func main() {
@@ -21,12 +22,17 @@ func main() {
 		log.Fatal("Failed to migrate database schema:", err)
 	}
 
-	router := mux.NewRouter()
-	deliveryAgentServer := Controller.NewDeliveryAgentServer(db)
-	deliveryAgentServer.RegisterRoutes(router)
+	lis, err := net.Listen("tcp", ":8082")
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+	s := grpc.NewServer()
 
-	log.Println("Starting HTTP server on port 8082...")
-	if err := http.ListenAndServe(":8082", router); err != nil {
-		log.Fatalf("Failed to serve HTTP: %v", err)
+	deliveryAgentServer := Controller.NewDeliveryAgentServer(db)
+	pb.RegisterDeliveryAgentServiceServer(s, deliveryAgentServer)
+
+	log.Printf("Server listening at %v", lis.Addr())
+	if err := s.Serve(lis); err != nil {
+		log.Fatalf("failed to serve: %v", err)
 	}
 }
