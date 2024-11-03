@@ -116,7 +116,7 @@ func TestAssignAgentToOrderSuccessfully(t *testing.T) {
 	_, err := client.AddDeliveryAgent(context.Background(), addReq)
 	assert.NoError(t, err)
 
-	assignReq := &pb.AssignAgentToOrderRequest{AgentId: 1, OrderId: 123}
+	assignReq := &pb.AssignAgentToOrderRequest{AgentId: 1, OrderId: 1}
 	resp, err := client.AssignAgentToOrder(context.Background(), assignReq)
 	assert.NoError(t, err)
 	assert.Equal(t, "Delivery agent assigned to order successfully", resp.Message)
@@ -127,7 +127,7 @@ func TestAssignAgentToOrderWhenDeliveryAgentNotFound(t *testing.T) {
 	setup()
 	defer teardown()
 
-	assignReq := &pb.AssignAgentToOrderRequest{AgentId: 999, OrderId: 123}
+	assignReq := &pb.AssignAgentToOrderRequest{AgentId: 999, OrderId: 1}
 	_, err := client.AssignAgentToOrder(context.Background(), assignReq)
 	assert.Error(t, err)
 	assert.Equal(t, codes.InvalidArgument, status.Code(err))
@@ -143,7 +143,7 @@ func TestAssignAgentToOrderWhenAlreadyAssigned(t *testing.T) {
 	_, err := client.AddDeliveryAgent(context.Background(), addReq)
 	assert.NoError(t, err)
 
-	assignReq := &pb.AssignAgentToOrderRequest{AgentId: 1, OrderId: 123}
+	assignReq := &pb.AssignAgentToOrderRequest{AgentId: 1, OrderId: 1}
 	_, err = client.AssignAgentToOrder(context.Background(), assignReq)
 	assert.NoError(t, err)
 
@@ -151,4 +151,20 @@ func TestAssignAgentToOrderWhenAlreadyAssigned(t *testing.T) {
 	assert.Error(t, err)
 	assert.Equal(t, codes.InvalidArgument, status.Code(err))
 	assert.Equal(t, "delivery agent is not available", status.Convert(err).Message())
+}
+
+// Test AssignAgentToOrder when order does not exist
+func TestAssignAgentToOrderWhenOrderNotFound(t *testing.T) {
+	setup()
+	defer teardown()
+
+	addReq := &pb.AddDeliveryAgentRequest{Name: "Ketan", City: "Hyderabad"}
+	_, err := client.AddDeliveryAgent(context.Background(), addReq)
+	assert.NoError(t, err)
+
+	assignReq := &pb.AssignAgentToOrderRequest{AgentId: 1, OrderId: 999}
+	_, err = client.AssignAgentToOrder(context.Background(), assignReq)
+	assert.Error(t, err)
+	assert.Equal(t, codes.InvalidArgument, status.Code(err))
+	assert.Equal(t, "order does not exist", status.Convert(err).Message())
 }

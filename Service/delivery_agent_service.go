@@ -1,6 +1,7 @@
 package Service
 
 import (
+	client "Fulfillment/Client"
 	"Fulfillment/Model"
 	"Fulfillment/Repository"
 	"errors"
@@ -41,6 +42,15 @@ func (s *DeliveryAgentService) AddDeliveryAgent(name string, city string) (*Mode
 
 // AssignAgentToOrder assigns a delivery agent to an order.
 func (s *DeliveryAgentService) AssignAgentToOrder(deliveryAgentID uint, orderID int) error {
+	// Check if the order exists using the REST client function
+	exists, err := client.CheckOrderExists(orderID)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		return errors.New("order does not exist")
+	}
+
 	agent, err := s.repo.FindByID(deliveryAgentID)
 	if err != nil {
 		return errors.New("delivery agent not found")

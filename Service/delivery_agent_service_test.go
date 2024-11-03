@@ -81,7 +81,7 @@ func TestAssignAgentToOrderSuccessfully(t *testing.T) {
 
 	agent, _ := service.AddDeliveryAgent(name, city)
 
-	orderID := 123
+	orderID := 1
 	err := service.AssignAgentToOrder(agent.Id, orderID)
 
 	assert.NoError(t, err)
@@ -98,7 +98,7 @@ func TestAssignAgentToOrderWhenDeliveryAgentNotFound(t *testing.T) {
 	db := setupTestDB()
 	service := setupService(db)
 
-	err := service.AssignAgentToOrder(999, 123)
+	err := service.AssignAgentToOrder(999, 1)
 
 	assert.Error(t, err)
 	assert.Equal(t, "delivery agent not found", err.Error())
@@ -113,13 +113,28 @@ func TestAssignAgentToOrderWhenAlreadyAssigned(t *testing.T) {
 
 	agent, _ := service.AddDeliveryAgent(name, city)
 
-	orderID1 := 123
+	orderID1 := 1
 	err := service.AssignAgentToOrder(agent.Id, orderID1)
 	assert.NoError(t, err)
 
-	orderID2 := 456
+	orderID2 := 2
 	err = service.AssignAgentToOrder(agent.Id, orderID2)
 
 	assert.Error(t, err)
 	assert.Equal(t, "delivery agent is not available", err.Error())
+}
+
+// Test AssignAgentToOrder when order is not found
+func TestAssignAgentToOrderWhenOrderNotFound(t *testing.T) {
+	db := setupTestDB()
+	service := setupService(db)
+	name := "Ketan"
+	city := "Hyderabad"
+
+	agent, _ := service.AddDeliveryAgent(name, city)
+
+	err := service.AssignAgentToOrder(agent.Id, 123)
+
+	assert.Error(t, err)
+	assert.Equal(t, "order does not exist", err.Error())
 }
