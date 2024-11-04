@@ -1,8 +1,10 @@
 package Service
 
 import (
+	client "Fulfillment/Client"
 	"Fulfillment/Model"
 	"Fulfillment/Repository"
+	"fmt"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -79,6 +81,14 @@ func TestAssignAgentToOrderSuccessfully(t *testing.T) {
 	name := "Ketan"
 	city := "Hyderabad"
 
+	// Mock CheckAndUpdateOrderStatus to simulate a successful check
+	var mockCheckAndUpdateOrderStatus = func(orderID int) (bool, error) {
+		return true, nil
+	}
+
+	// Replace the real HTTP client functions with mocks
+	client.CheckAndUpdateOrderStatus = mockCheckAndUpdateOrderStatus
+
 	agent, _ := service.AddDeliveryAgent(name, city)
 
 	orderID := 1
@@ -111,6 +121,14 @@ func TestAssignAgentToOrderWhenAlreadyAssigned(t *testing.T) {
 	name := "Ketan"
 	city := "Hyderabad"
 
+	// Mock CheckAndUpdateOrderStatus to simulate a successful check
+	var mockCheckAndUpdateOrderStatus = func(orderID int) (bool, error) {
+		return true, nil
+	}
+
+	// Replace the real HTTP client functions with mocks
+	client.CheckAndUpdateOrderStatus = mockCheckAndUpdateOrderStatus
+
 	agent, _ := service.AddDeliveryAgent(name, city)
 
 	orderID1 := 1
@@ -131,10 +149,41 @@ func TestAssignAgentToOrderWhenOrderNotFound(t *testing.T) {
 	name := "Ketan"
 	city := "Hyderabad"
 
+	// Mock CheckAndUpdateOrderStatus to simulate a successful check
+	var mockCheckAndUpdateOrderStatus = func(orderID int) (bool, error) {
+		return false, nil
+	}
+
+	// Replace the real HTTP client functions with mocks
+	client.CheckAndUpdateOrderStatus = mockCheckAndUpdateOrderStatus
+
 	agent, _ := service.AddDeliveryAgent(name, city)
 
 	err := service.AssignAgentToOrder(agent.Id, 123)
 
 	assert.Error(t, err)
 	assert.Equal(t, "order does not exist", err.Error())
+}
+
+// Test AssignAgentToOrder when order exists but cannot be assigned
+func TestAssignAgentToOrderWhenOrderExistsButCannotBeAssigned(t *testing.T) {
+	db := setupTestDB()
+	service := setupService(db)
+	name := "Ketan"
+	city := "Hyderabad"
+
+	// Mock CheckAndUpdateOrderStatus to simulate a successful check
+	var mockCheckAndUpdateOrderStatus = func(orderID int) (bool, error) {
+		return true, fmt.Errorf("order cannot be assigned")
+	}
+
+	// Replace the real HTTP client functions with mocks
+	client.CheckAndUpdateOrderStatus = mockCheckAndUpdateOrderStatus
+
+	agent, _ := service.AddDeliveryAgent(name, city)
+
+	err := service.AssignAgentToOrder(agent.Id, 123)
+
+	assert.Error(t, err)
+	assert.Equal(t, "order cannot be assigned", err.Error())
 }

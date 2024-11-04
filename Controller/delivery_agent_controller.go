@@ -41,7 +41,7 @@ func (s *DeliveryAgentServer) AssignAgentToOrder(ctx context.Context, req *pb.As
 
 	err := s.Service.AssignAgentToOrder(uint(agentID), int(orderID))
 	if err != nil {
-		if err.Error() == "delivery agent not found" || err.Error() == "delivery agent is not available" || err.Error() == "order does not exist" {
+		if err.Error() == "delivery agent not found" || err.Error() == "delivery agent is not available" || err.Error() == "order does not exist" || err.Error() == "order cannot be assigned" {
 			return nil, grpc.Errorf(codes.InvalidArgument, err.Error())
 		}
 		return nil, grpc.Errorf(codes.Internal, "An error occurred: "+err.Error())

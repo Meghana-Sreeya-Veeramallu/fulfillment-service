@@ -1,11 +1,13 @@
 package Controller
 
 import (
+	orderClient "Fulfillment/Client"
 	"Fulfillment/Model"
 	"Fulfillment/Repository"
 	"Fulfillment/Service"
 	pb "Fulfillment/proto"
 	"context"
+	"fmt"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -112,6 +114,14 @@ func TestAssignAgentToOrderSuccessfully(t *testing.T) {
 	setup()
 	defer teardown()
 
+	// Mock CheckAndUpdateOrderStatus to simulate a successful check
+	var mockCheckAndUpdateOrderStatus = func(orderID int) (bool, error) {
+		return true, nil
+	}
+
+	// Replace the real HTTP client functions with mocks
+	orderClient.CheckAndUpdateOrderStatus = mockCheckAndUpdateOrderStatus
+
 	addReq := &pb.AddDeliveryAgentRequest{Name: "Ketan", City: "Hyderabad"}
 	_, err := client.AddDeliveryAgent(context.Background(), addReq)
 	assert.NoError(t, err)
@@ -158,6 +168,14 @@ func TestAssignAgentToOrderWhenOrderNotFound(t *testing.T) {
 	setup()
 	defer teardown()
 
+	// Mock CheckAndUpdateOrderStatus to simulate a successful check
+	var mockCheckAndUpdateOrderStatus = func(orderID int) (bool, error) {
+		return false, nil
+	}
+
+	// Replace the real HTTP client functions with mocks
+	orderClient.CheckAndUpdateOrderStatus = mockCheckAndUpdateOrderStatus
+
 	addReq := &pb.AddDeliveryAgentRequest{Name: "Ketan", City: "Hyderabad"}
 	_, err := client.AddDeliveryAgent(context.Background(), addReq)
 	assert.NoError(t, err)
@@ -167,4 +185,28 @@ func TestAssignAgentToOrderWhenOrderNotFound(t *testing.T) {
 	assert.Error(t, err)
 	assert.Equal(t, codes.InvalidArgument, status.Code(err))
 	assert.Equal(t, "order does not exist", status.Convert(err).Message())
+}
+
+// Test AssignAgentToOrder when order exists but cannot be assigned
+func TestAssignAgentToOrderWhenOrderExistsButCannotBeAssigned(t *testing.T) {
+	setup()
+	defer teardown()
+
+	// Mock CheckAndUpdateOrderStatus to simulate a successful check
+	var mockCheckAndUpdateOrderStatus = func(orderID int) (bool, error) {
+		return true, fmt.Errorf("order cannot be assigned")
+	}
+
+	// Replace the real HTTP client functions with mocks
+	orderClient.CheckAndUpdateOrderStatus = mockCheckAndUpdateOrderStatus
+
+	addReq := &pb.AddDeliveryAgentRequest{Name: "Ketan", City: "Hyderabad"}
+	_, err := client.AddDeliveryAgent(context.Background(), addReq)
+	assert.NoError(t, err)
+
+	assignReq := &pb.AssignAgentToOrderRequest{AgentId: 1, OrderId: 10}
+	_, err = client.AssignAgentToOrder(context.Background(), assignReq)
+	assert.Error(t, err)
+	assert.Equal(t, codes.InvalidArgument, status.Code(err))
+	assert.Equal(t, "order cannot be assigned", status.Convert(err).Message())
 }
